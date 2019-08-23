@@ -48,3 +48,26 @@ class LSTMAttentionClassifier(nn.Module):
             loss = self.xentropy(logits, targets)
 
         return {'output': logits, 'loss': loss, 'attentions': attended['attentions']}
+
+
+class CNNClassifier(nn.Module):
+    def __init__(self, embedder, extractor):
+        super(CNNClassifier, self).__init__()
+        self.embedder = embedder
+        self.extractor = extractor
+        self.classifier = nn.Linear(sum(extractor.channels), 1)
+        self.xentropy = nn.BCEWithLogitsLoss()
+
+    def forward(self, tokens, targets=None):
+        embedded = self.embedder(tokens)
+        extracted = self.extractor(embedded['output'])
+
+        logits = self.classifier(extracted['output'])
+        loss = None
+
+        if targets is not None:
+            logits = logits.view(-1)
+            targets = targets.float()
+            loss = self.xentropy(logits, targets)
+
+        return {'output': logits, 'loss': loss}
