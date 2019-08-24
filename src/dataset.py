@@ -23,12 +23,13 @@ class IMDBDatset(Dataset):
         self.labels.extend(pos_labels + neg_labels)
 
         self.tokens, self.labels = shuffle(self.tokens, self.labels)
+        self.labels = [self.label_to_index[label] for label in self.labels]
 
     def __len__(self):
         return len(self.tokens)
 
     def __getitem__(self, item):
-        return self.tokens[item], self.label_to_index[self.labels[item]]
+        return self.tokens[item], self.labels[item]
 
     def split_data(self, size):
         dataset = copy.deepcopy(self)
